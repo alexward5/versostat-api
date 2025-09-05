@@ -48,7 +48,7 @@ export class ApiServiceStack extends cdk.Stack {
         const repoUri = cdk.Fn.importValue("VersoStat-EcrRepositoryUri");
 
         const dbHost = cdk.Fn.importValue("VersoStat-DbHost");
-        const dbPort = Number(cdk.Fn.importValue("VersoStat-DbPort"));
+        const dbPort = cdk.Fn.importValue("VersoStat-DbPort");
         const dbSecretArn = cdk.Fn.importValue("VersoStat-DbSecretArn");
         const dbSgId = cdk.Fn.importValue("VersoStat-DbSecurityGroupId");
 
@@ -131,35 +131,42 @@ export class ApiServiceStack extends cdk.Stack {
             `${repoUri}:${props.imageTag}`
         );
 
+        const dbSecret = secrets.Secret.fromSecretCompleteArn(
+            this,
+            "DbSecret",
+            dbSecretArn
+        );
+
         const container = taskDef.addContainer("web", {
             image,
             logging: ecs.LogDriver.awsLogs({ logGroup, streamPrefix: "api" }),
             environment: {
-                NODE_ENV: "production",
                 DB_HOST: dbHost,
-                DB_PORT: String(dbPort),
+                DB_PORT: dbPort,
                 DB_NAME: "versostat_db",
                 PORT: "4000",
+
+                PGHOST: dbHost,
+                PGPORT: dbPort,
+                PGDATABASE: "versostat_db",
+
+                dbhost: dbHost,
+                dbport: dbPort,
+                database: "versostat_db",
+
+                PGSSLMODE: "no-verify",
             },
             secrets: {
-                DB_USER: ecs.Secret.fromSecretsManager(
-                    secrets.Secret.fromSecretCompleteArn(
-                        this,
-                        "DbUser",
-                        dbSecretArn
-                    ),
-                    "username"
-                ),
+                DB_USER: ecs.Secret.fromSecretsManager(dbSecret, "username"),
                 DB_PASSWORD: ecs.Secret.fromSecretsManager(
-                    secrets.Secret.fromSecretCompleteArn(
-                        this,
-                        "DbPass",
-                        dbSecretArn
-                    ),
+                    dbSecret,
                     "password"
                 ),
+
+                dbuser: ecs.Secret.fromSecretsManager(dbSecret, "username"),
+                dbpassword: ecs.Secret.fromSecretsManager(dbSecret, "password"),
             },
-            portMappings: [{ containerPort: 4000 }], // hostPort implicit == containerPort in awsvpc
+            portMappings: [{ containerPort: 4000 }],
         });
 
         // ---- Fargate Service ----
