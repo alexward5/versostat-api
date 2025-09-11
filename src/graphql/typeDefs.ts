@@ -11,6 +11,7 @@ const typeDefs = `#graphql
         fpl_assists: Int!
         fpl_bps: Int!
         fpl_clean_sheet: Int!
+        fpl_defensive_contribution: Int!
     }
 
     type Player {
