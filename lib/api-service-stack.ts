@@ -157,6 +157,8 @@ export class ApiServiceStack extends cdk.Stack {
                 PGSSLMODE: "verify-full", // verify CA + servername
                 PGSSLROOTCERT: "/etc/ssl/certs/rds-global-bundle.pem",
                 NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-global-bundle.pem",
+
+                ALLOWED_ORIGINS: "https://versostat.com",
             },
             secrets: {
                 DB_USER: ecs.Secret.fromSecretsManager(dbSecret, "username"),
