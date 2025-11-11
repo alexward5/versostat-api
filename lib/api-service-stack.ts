@@ -43,7 +43,7 @@ export class ApiServiceStack extends cdk.Stack {
 
         const clusterName = cdk.Fn.importValue("VersoStat-ClusterName");
         const clusterArn = cdk.Fn.importValue("VersoStat-ClusterArn");
-        const listenerArn = cdk.Fn.importValue("VersoStat-HttpListenerArn");
+        const listenerArn = cdk.Fn.importValue("VersoStat-HttpsListenerArn");
         const taskSgId = cdk.Fn.importValue("VersoStat-TaskSecurityGroupId");
         const repoUri = cdk.Fn.importValue("VersoStat-EcrRepositoryUri");
 
@@ -192,7 +192,7 @@ export class ApiServiceStack extends cdk.Stack {
         });
 
         scaling.scaleOnCpuUtilization("CpuScaling", {
-            targetUtilizationPercent: 70, // Aim to keep avg CPU ~70%
+            targetUtilizationPercent: 70,
             scaleOutCooldown: cdk.Duration.seconds(60),
             scaleInCooldown: cdk.Duration.seconds(120),
         });
@@ -254,7 +254,7 @@ export class ApiServiceStack extends cdk.Stack {
         // Attach the ECS service to the TG explicitly
         service.attachToApplicationTargetGroup(tg);
 
-        // Forward HTTP listener traffic to the TG
+        // Forward HTTPS listener traffic to the TG
         new elbv2.ApplicationListenerRule(this, "ApiRule", {
             listener,
             priority: 10,
