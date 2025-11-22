@@ -208,7 +208,7 @@ export class ApiServiceStack extends cdk.Stack {
         cfnSvc.launchType = undefined;
         cfnSvc.capacityProviderStrategy = [
             { capacityProvider: "FARGATE_SPOT", weight: 1 },
-            { capacityProvider: "FARGATE", weight: 1 },
+            { capacityProvider: "FARGATE", weight: 0 },
         ];
         cfnSvc.deploymentConfiguration = {
             minimumHealthyPercent: 100,
