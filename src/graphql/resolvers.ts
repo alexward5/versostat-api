@@ -8,7 +8,7 @@ const resolvers = {
     Query: {
         players: async (_: unknown, { ids }: { ids: string[] }) => {
             let query = `
-                SELECT * FROM "${SCHEMA}".v_player_data
+                SELECT * FROM "${SCHEMA}".mv_player_data
             `;
 
             if (ids?.length) {
@@ -21,7 +21,7 @@ const resolvers = {
         },
         teams: async (_: unknown, { teamNames }: { teamNames: string[] }) => {
             let query = `
-                SELECT * FROM "${SCHEMA}".v_team_matchlog
+                SELECT * FROM "${SCHEMA}".mv_team_matchlog
             `;
 
             if (teamNames?.length) {
@@ -86,7 +86,7 @@ const resolvers = {
         ) => {
             const query = `
                 SELECT *
-                FROM "${SCHEMA}".v_player_matchlog
+                FROM "${SCHEMA}".mv_player_matchlog
                 WHERE fpl_player_id = '${parent.fpl_player_id}'
                 ${gameweekStart ? `AND fpl_gameweek >= ${gameweekStart}` : ""}
                 ${gameweekEnd ? `AND fpl_gameweek <= ${gameweekEnd}` : ""}
