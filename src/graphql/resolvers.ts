@@ -73,11 +73,11 @@ const resolvers = {
             const query = `
                 SELECT *
                 FROM "${SCHEMA}".mv_player_matchlog
-                WHERE fpl_player_id = '${parent.fpl_player_id}'
+                WHERE fpl_player_id = $1
                 ORDER BY fpl_gameweek ASC
             `;
 
-            const { rows } = await pool.query(query);
+            const { rows } = await pool.query(query, [parent.fpl_player_id]);
 
             return rows;
         },
