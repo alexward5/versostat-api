@@ -2,9 +2,9 @@ require("dotenv").config();
 import runTestCases from "./test-runner";
 
 const testCases = [
-  {
-    id: "getPlayersMetadata",
-    query: `
+    {
+        id: "getPlayersMetadata",
+        query: `
       query {
         players {
           id
@@ -13,27 +13,24 @@ const testCases = [
         }
       }
     `,
-  },
-  {
-    id: "getPlayersById",
-    query: `
-      query ($ids: [Int!]) {
-        players (ids: $ids) {
+    },
+    {
+        id: "getPlayersById",
+        query: `
+      query {
+        players {
           id
           first_name
           second_name
         }
       }
     `,
-    variables: {
-      ids: [1, 2, 3],
     },
-  },
-  {
-    id: "getPlayersSeasonTotals",
-    query: `
-      query ($ids: [Int!]) {
-        players (ids: $ids) {
+    {
+        id: "getPlayersSeasonTotals",
+        query: `
+      query {
+        players {
           player_season_totals {
             goals_scored
             assists
@@ -56,15 +53,12 @@ const testCases = [
         }
       }
     `,
-    variables: {
-      ids: [1, 2, 3],
     },
-  },
-  {
-    id: "getPlayersGameweekData",
-    query: `
-      query ($ids: [Int!]) {
-        players (ids: $ids) {
+    {
+        id: "getPlayersGameweekData",
+        query: `
+      query {
+        players {
           player_gameweek_data {
             position
             xp
@@ -99,10 +93,7 @@ const testCases = [
         }
       }
     `,
-    variables: {
-      ids: [1, 2, 3],
     },
-  },
 ];
 
 runTestCases("PlayerData", testCases);

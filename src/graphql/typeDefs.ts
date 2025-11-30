@@ -22,10 +22,7 @@ const typeDefs = `#graphql
         fpl_player_position: String!
         fpl_player_cost: Float!
         fpl_selected_by_percent: Float!
-        player_gameweek_data(
-            gameweekStart: Int
-            gameweekEnd: Int
-        ): [PlayerGameweekData!]!
+        player_gameweek_data: [PlayerGameweekData!]!
     }
 
     type TeamMatchlog {
@@ -46,8 +43,8 @@ const typeDefs = `#graphql
     }
 
     type Query {
-        players(ids: [String!]): [Player!]!
-        teams(teamNames: [String!]): [Team!]!
+        players: [Player!]!
+        teams: [Team!]!
         events: [Events!]!
     }
 `;

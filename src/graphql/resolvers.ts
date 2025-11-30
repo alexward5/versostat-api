@@ -6,27 +6,19 @@ const SCHEMA = "test_schema_2025";
 
 const resolvers = {
     Query: {
-        players: async (_: unknown, { ids }: { ids: string[] }) => {
-            let query = `
+        players: async () => {
+            const query = `
                 SELECT * FROM "${SCHEMA}".mv_player_data
             `;
-
-            if (ids?.length) {
-                query += ` WHERE fpl_player_id IN ('${ids.join("','")}')`;
-            }
 
             const { rows } = await pool.query(query);
 
             return rows;
         },
-        teams: async (_: unknown, { teamNames }: { teamNames: string[] }) => {
-            let query = `
+        teams: async () => {
+            const query = `
                 SELECT * FROM "${SCHEMA}".mv_team_matchlog
             `;
-
-            if (teamNames?.length) {
-                query += ` WHERE fbref_team IN ('${teamNames.join("','")}')`;
-            }
 
             const { rows } = await pool.query(query);
 
@@ -77,19 +69,11 @@ const resolvers = {
         },
     },
     Player: {
-        player_gameweek_data: async (
-            parent: Player,
-            {
-                gameweekStart,
-                gameweekEnd,
-            }: { gameweekStart: number; gameweekEnd: number }
-        ) => {
+        player_gameweek_data: async (parent: Player) => {
             const query = `
                 SELECT *
                 FROM "${SCHEMA}".mv_player_matchlog
                 WHERE fpl_player_id = '${parent.fpl_player_id}'
-                ${gameweekStart ? `AND fpl_gameweek >= ${gameweekStart}` : ""}
-                ${gameweekEnd ? `AND fpl_gameweek <= ${gameweekEnd}` : ""}
                 ORDER BY fpl_gameweek ASC
             `;
 
