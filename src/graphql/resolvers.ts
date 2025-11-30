@@ -1,6 +1,7 @@
 import pool from "../pg";
 import type Player from "../types/Player";
 import type Team from "../types/Team";
+import type { GraphQLContext } from "../dataloaders";
 
 const SCHEMA = "test_schema_2025";
 
@@ -69,17 +70,14 @@ const resolvers = {
         },
     },
     Player: {
-        player_gameweek_data: async (parent: Player) => {
-            const query = `
-                SELECT *
-                FROM "${SCHEMA}".mv_player_matchlog
-                WHERE fpl_player_id = $1
-                ORDER BY fpl_gameweek ASC
-            `;
-
-            const { rows } = await pool.query(query, [parent.fpl_player_id]);
-
-            return rows;
+        player_gameweek_data: async (
+            parent: Player,
+            _args: {},
+            context: GraphQLContext
+        ) => {
+            // Use DataLoader to batch queries - this will automatically batch
+            // multiple player queries into a single database query
+            return context.playerGameweekDataLoader.load(parent.fpl_player_id);
         },
     },
 };
