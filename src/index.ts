@@ -17,6 +17,13 @@ import { createPlayerGameweekDataLoader } from "./dataloaders";
         .map((s) => s.trim())
         .filter(Boolean);
 
+    if (process.env.NODE_ENV !== "production") {
+        const sandboxOrigin = `http://localhost:${PORT}`;
+        if (!allowedOrigins.includes(sandboxOrigin)) {
+            allowedOrigins.push(sandboxOrigin);
+        }
+    }
+
     const corsOptions: cors.CorsOptions = {
         origin(origin, cb) {
             if (!origin) return cb(null, true); // allow tools/no-origin
@@ -33,7 +40,7 @@ import { createPlayerGameweekDataLoader } from "./dataloaders";
 
     // Health endpoint for ALB
     app.get("/health", (_req: Request, res: Response) =>
-        res.status(200).send("ok")
+        res.status(200).send("ok"),
     );
 
     // Apollo on /graphql
@@ -54,19 +61,25 @@ import { createPlayerGameweekDataLoader } from "./dataloaders";
                     playerGameweekDataLoader: createPlayerGameweekDataLoader(),
                 };
             },
-        })
+        }),
     );
 
     app.listen(PORT, HOST, () => {
         console.log(
-            `HTTP listening on http://${HOST}:${PORT}  (GraphQL at /graphql)`
+            `HTTP listening on http://${HOST}:${PORT}  (GraphQL at /graphql)`,
         );
         console.log(
             `Allowed CORS origins: ${
                 allowedOrigins.length
                     ? allowedOrigins.join(", ")
                     : "[none configured]"
-            }`
+            }`,
         );
+        if (process.env.NODE_ENV !== "production") {
+            const url = `http://localhost:${PORT}/graphql`;
+            console.log(
+                `Sandbox: \u001b]8;;${url}\u0007${url}\u001b]8;;\u0007`,
+            );
+        }
     });
 })();

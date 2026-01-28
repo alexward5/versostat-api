@@ -16,10 +16,6 @@ Once you've run the FPL Edge Scraper against your database, create a .env file i
 
 Once you have a .env created with the necessary information for your database, open a terminal and install the required packages with `npm install`.
 
-## Testing the database connection
-
-In order to test that the API is connecting to your database, and that the proper data is being returned run `npm test` from your terminal. This will trigger a series of integration tests which query the database, and then compare the data returned from the GraphQL resolver functions with the existing snapshots found in `./src/testing/\_snapshots\_`. If the tests run without any errors, the database connection is working and the API is returning data as expected.
-
 ## Running the API in development mode
 
 In order to run the API locally run `npm run dev` from your terminal. This will allow you to run the API and make changes while only recompiling the files that you made changes to.

@@ -1,84 +1,42 @@
 import pool from "../pg";
 import type Player from "../types/Player";
-import type Team from "../types/Team";
 import type { GraphQLContext } from "../dataloaders";
 
-const SCHEMA = "test_schema_2025";
+const SCHEMA = "my_schema";
 
 const resolvers = {
     Query: {
-        players: async () => {
-            const query = `
-                SELECT * FROM "${SCHEMA}".mv_player_data
-            `;
-
-            const { rows } = await pool.query(query);
-
-            return rows;
+        players: async (): Promise<Player[]> => {
+            const { rows } = await pool.query(`
+                SELECT fpl_player_id,
+                    fpl_web_name,
+                    fpl_team_name,
+                    fpl_player_position,
+                    fpl_player_cost,
+                    fpl_selected_by_percent
+                FROM "${SCHEMA}".mv_player
+            `);
+            return rows as Player[];
         },
         teams: async () => {
-            const query = `
-                SELECT * FROM "${SCHEMA}".mv_team_matchlog
-            `;
-
-            const { rows } = await pool.query(query);
-
-            // Create a Map to organize teams by their fbref_team identifier
-            const teamMap = new Map<string, Team>();
-
-            rows.forEach((row) => {
-                // If the team is not already in the map, add it
-                if (!teamMap.has(row.fbref_team)) {
-                    teamMap.set(row.fbref_team, {
-                        fbref_team: row.fbref_team,
-                        fbref_team_matchlog: [],
-                    });
-                }
-
-                // Retrieve the team from the map and add the matchlog fields
-                const team = teamMap.get(row.fbref_team)!;
-                team.fbref_team_matchlog.push({
-                    fbref_match_date: row.fbref_date,
-                    fbref_round: row.fbref_round,
-                });
-            });
-
-            teamMap.forEach((team) => {
-                // Sort match logs by match date
-                team.fbref_team_matchlog.sort(
-                    (a, b) =>
-                        new Date(a.fbref_match_date).getTime() -
-                        new Date(b.fbref_match_date).getTime()
-                );
-
-                // Assign a match number based on the sorted order
-                team.fbref_team_matchlog.forEach((matchlog, index) => {
-                    matchlog.match_number = index + 1;
-                });
-            });
-
-            return Array.from(teamMap.values());
+            const { rows } = await pool.query(`
+                SELECT name FROM "${SCHEMA}".fpl_teams
+            `);
+            return rows;
         },
         events: async () => {
-            const query = `
-                SELECT * FROM "${SCHEMA}".fpl_events
-            `;
-
-            const { rows } = await pool.query(query);
-
+            const { rows } = await pool.query(`
+                SELECT id, is_current, finished FROM "${SCHEMA}".fpl_events
+            `);
             return rows;
         },
     },
     Player: {
-        player_gameweek_data: async (
+        player_gameweek_data: (
             parent: Player,
-            _args: {},
+            _args: Record<string, never>,
             context: GraphQLContext
-        ) => {
-            // Use DataLoader to batch queries - this will automatically batch
-            // multiple player queries into a single database query
-            return context.playerGameweekDataLoader.load(parent.fpl_player_id);
-        },
+        ) => context.playerGameweekDataLoader.load(parent.fpl_player_id),
     },
 };
 

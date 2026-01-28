@@ -2,50 +2,53 @@ import DataLoader from "dataloader";
 import pool from "./pg";
 import type PlayerGameweekData from "./types/PlayerGameweekData";
 
-const SCHEMA = "test_schema_2025";
+const SCHEMA = "my_schema";
 
-// DataLoader for batching player gameweek data queries
-// This solves the N+1 problem by batching multiple player_id queries into a single database query
+// Batches player gameweek data by fpl_player_id to avoid N+1 when resolving player_gameweek_data.
+// Requires fpl_player_id to be text in mv_player_gameweek and mv_player.
 export const createPlayerGameweekDataLoader = () => {
     return new DataLoader<string, PlayerGameweekData[]>(
         async (playerIds: readonly string[]) => {
-            // Create a single query that fetches gameweek data for all requested players
+            if (playerIds.length === 0) return playerIds.map(() => []);
+
             const query = `
-            SELECT *
-            FROM "${SCHEMA}".mv_player_matchlog
-            WHERE fpl_player_id = ANY($1::text[])
-            ORDER BY fpl_player_id, fpl_gameweek ASC
-        `;
+                SELECT fpl_player_id,
+                    fpl_minutes,
+                    fpl_round,
+                    fpl_total_points,
+                    fpl_goals_scored,
+                    fpl_assists,
+                    fpl_bps,
+                    fpl_clean_sheet,
+                    fpl_defensive_contribution,
+                    fpl_expected_goals,
+                    fpl_expected_assists,
+                    fpl_xgi,
+                    sm_shots_on_target,
+                    sm_big_chances_created,
+                    sm_key_passes,
+                    calc_xgap
+                FROM "${SCHEMA}".mv_player_gameweek
+                WHERE fpl_player_id = ANY($1::text[])
+                ORDER BY fpl_player_id, fpl_round ASC
+            `;
 
             const { rows } = await pool.query(query, [playerIds]);
 
-            // Group results by player_id
-            const resultsByPlayerId = new Map<string, PlayerGameweekData[]>();
+            const byPlayerId = new Map<string, PlayerGameweekData[]>();
+            for (const id of playerIds) {
+                byPlayerId.set(id, []);
+            }
+            for (const row of rows as (PlayerGameweekData & { fpl_player_id: string })[]) {
+                const { fpl_player_id, ...rest } = row;
+                byPlayerId.get(fpl_player_id)!.push(rest as PlayerGameweekData);
+            }
 
-            // Initialize empty arrays for all player IDs
-            playerIds.forEach((playerId) => {
-                resultsByPlayerId.set(playerId, []);
-            });
-
-            // Populate the map with actual results
-            // Note: rows include fpl_player_id for grouping, but we return PlayerGameweekData[]
-            rows.forEach((row: any) => {
-                const playerId = row.fpl_player_id;
-                const existing = resultsByPlayerId.get(playerId) || [];
-                existing.push(row as PlayerGameweekData);
-                resultsByPlayerId.set(playerId, existing);
-            });
-
-            // Return results in the same order as the input playerIds
-            return playerIds.map(
-                (playerId) => resultsByPlayerId.get(playerId) || []
-            );
+            return playerIds.map((id) => byPlayerId.get(id)!);
         }
     );
 };
 
-// Context type for GraphQL resolvers
-// This ensures type safety when accessing DataLoaders in resolvers
 export interface GraphQLContext {
     playerGameweekDataLoader: ReturnType<typeof createPlayerGameweekDataLoader>;
 }
