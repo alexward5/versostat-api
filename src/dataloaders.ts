@@ -4,8 +4,7 @@ import type PlayerGameweekData from "./types/PlayerGameweekData";
 
 const SCHEMA = "my_schema";
 
-// Batches player gameweek data by fpl_player_id to avoid N+1 when resolving player_gameweek_data.
-// Requires fpl_player_id to be text in mv_player_gameweek and mv_player.
+// Batches player gameweek data by fpl_player_id to avoid N+1 when resolving player_gameweek_data
 export const createPlayerGameweekDataLoader = () => {
     return new DataLoader<string, PlayerGameweekData[]>(
         async (playerIds: readonly string[]) => {
@@ -39,13 +38,15 @@ export const createPlayerGameweekDataLoader = () => {
             for (const id of playerIds) {
                 byPlayerId.set(id, []);
             }
-            for (const row of rows as (PlayerGameweekData & { fpl_player_id: string })[]) {
+            for (const row of rows as (PlayerGameweekData & {
+                fpl_player_id: string;
+            })[]) {
                 const { fpl_player_id, ...rest } = row;
                 byPlayerId.get(fpl_player_id)!.push(rest as PlayerGameweekData);
             }
 
             return playerIds.map((id) => byPlayerId.get(id)!);
-        }
+        },
     );
 };
 
