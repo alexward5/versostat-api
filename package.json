@@ -1,5 +1,5 @@
 {
-    "name": "fpl-edge-api",
+    "name": "versostat-api",
     "version": "1.0.0",
     "description": "",
     "main": "src/index.js",
