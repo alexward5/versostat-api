@@ -25,6 +25,7 @@ const pool = new Pool({
     max: 20,
     idleTimeoutMillis: 15000,
     connectionTimeoutMillis: 10000,
+    keepAlive: true,
 });
 
 export default pool;

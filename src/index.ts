@@ -4,7 +4,6 @@ import cors from "cors";
 import { json } from "express";
 import { expressMiddleware } from "@apollo/server/express4";
 import createServer from "./apollo-server";
-import { createPlayerGameweekDataLoader } from "./dataloaders";
 
 (async () => {
     const PORT = Number(process.env.PORT ?? 4000);
@@ -53,15 +52,7 @@ import { createPlayerGameweekDataLoader } from "./dataloaders";
         "/graphql",
         cors<cors.CorsRequest>(corsOptions),
         json(),
-        expressMiddleware(apollo, {
-            context: async () => {
-                // Create a new DataLoader instance for each request
-                // This ensures proper batching within a single request
-                return {
-                    playerGameweekDataLoader: createPlayerGameweekDataLoader(),
-                };
-            },
-        }),
+        expressMiddleware(apollo, { context: async () => ({}) }),
     );
 
     app.listen(PORT, HOST, () => {
