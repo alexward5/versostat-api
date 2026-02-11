@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express, { Request, Response } from "express";
 import cors from "cors";
+import compression from "compression";
 import { json } from "express";
 import { expressMiddleware } from "@apollo/server/express4";
 import createServer from "./apollo-server";
@@ -37,6 +38,7 @@ import { createPlayerGameweekDataLoader } from "./dataloaders";
     };
 
     const app = express();
+    app.use(compression());
 
     // Health endpoint for ALB
     app.get("/health", (_req: Request, res: Response) =>

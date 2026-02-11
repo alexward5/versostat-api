@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import * as cdk from "aws-cdk-lib";
 import { ApiServiceStack } from "../lib/api-service-stack";
 
@@ -13,6 +14,6 @@ new ApiServiceStack(app, "VersoStat-ApiServiceStack-prod", {
     env,
     imageTag: process.env.IMAGE_TAG ?? "latest",
     desiredCount: 1,
-    cpu: 256,
-    memoryMiB: 512,
+    cpu: 512,
+    memoryMiB: 1024,
 });
