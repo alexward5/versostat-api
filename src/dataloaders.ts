@@ -1,8 +1,6 @@
 import DataLoader from "dataloader";
-import pool from "./pg";
+import pool, { SCHEMA } from "./pg";
 import type PlayerGameweekData from "./types/PlayerGameweekData";
-
-const SCHEMA = "my_schema";
 
 // Batches player gameweek data by fpl_player_id in a single query per request
 export function createPlayerGameweekDataLoader() {

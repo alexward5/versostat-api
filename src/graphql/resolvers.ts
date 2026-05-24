@@ -1,9 +1,7 @@
-import pool from "../pg";
+import pool, { SCHEMA } from "../pg";
 import type Player from "../types/Player";
 import type { GraphQLContext } from "../dataloaders";
 import { createCache } from "../cache";
-
-const SCHEMA = "my_schema";
 
 const playersCache = createCache<Player[]>();
 const teamsCache = createCache<{ name: string }[]>();

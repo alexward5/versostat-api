@@ -2,6 +2,8 @@ import fs from "fs";
 import { Pool } from "pg";
 import { ConnectionOptions } from "tls";
 
+export const SCHEMA = "2025-2026";
+
 let ssl: boolean | ConnectionOptions = false;
 if (process.env.NODE_ENV === "production") {
     ssl = {
