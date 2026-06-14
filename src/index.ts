@@ -4,7 +4,10 @@ import cors from "cors";
 import { json } from "express";
 import { expressMiddleware } from "@apollo/server/express4";
 import createServer from "./apollo-server";
-import { createPlayerGameweekDataLoader } from "./dataloaders";
+import {
+    createPlayerGameweekStatsDataLoader,
+    createPlayerStatsDataLoader,
+} from "./dataloaders";
 
 (async () => {
     const PORT = Number(process.env.PORT ?? 4000);
@@ -40,7 +43,7 @@ import { createPlayerGameweekDataLoader } from "./dataloaders";
 
     // Health endpoint for ALB
     app.get("/health", (_req: Request, res: Response) =>
-        res.status(200).send("ok")
+        res.status(200).send("ok"),
     );
 
     // Apollo on /graphql
@@ -55,26 +58,28 @@ import { createPlayerGameweekDataLoader } from "./dataloaders";
         json(),
         expressMiddleware(apollo, {
             context: async () => ({
-                playerGameweekDataLoader: createPlayerGameweekDataLoader(),
+                playerGameweekStatsDataLoader:
+                    createPlayerGameweekStatsDataLoader(),
+                playerStatsDataLoader: createPlayerStatsDataLoader(),
             }),
-        })
+        }),
     );
 
     app.listen(PORT, HOST, () => {
         console.log(
-            `HTTP listening on http://${HOST}:${PORT}  (GraphQL at /graphql)`
+            `HTTP listening on http://${HOST}:${PORT}  (GraphQL at /graphql)`,
         );
         console.log(
             `Allowed CORS origins: ${
                 allowedOrigins.length
                     ? allowedOrigins.join(", ")
                     : "[none configured]"
-            }`
+            }`,
         );
         if (process.env.NODE_ENV !== "production") {
             const url = `http://localhost:${PORT}/graphql`;
             console.log(
-                `Sandbox: \u001b]8;;${url}\u0007${url}\u001b]8;;\u0007`
+                `Sandbox: \u001b]8;;${url}\u0007${url}\u001b]8;;\u0007`,
             );
         }
     });

@@ -1,5 +1,5 @@
 const typeDefs = `#graphql
-    type PlayerGameweekData {
+    type PlayerGameweekStats {
         fpl_minutes: Int!
         fpl_round: Int!
         fpl_total_points: Int!
@@ -17,6 +17,24 @@ const typeDefs = `#graphql
         calc_xgap: Float!
     }
 
+    type PlayerStats {
+        games_played: Int!
+        sum_minutes: Int!
+        sum_points: Int!
+        sum_goals: Int!
+        sum_assists: Int!
+        sum_bps: Int!
+        sum_cleansheets: Int!
+        sum_defensive_contributions: Int!
+        sum_xg: Float!
+        sum_xa: Float!
+        sum_xgi: Float!
+        sum_shots_on_target: Int!
+        sum_big_chances_created: Int!
+        sum_key_passes: Int!
+        sum_xgap: Float!
+    }
+
     type Player {
         fpl_player_id: String!
         fpl_web_name: String!
@@ -24,7 +42,8 @@ const typeDefs = `#graphql
         fpl_player_position: String!
         fpl_player_cost: Float!
         fpl_selected_by_percent: Float!
-        player_gameweek_data: [PlayerGameweekData!]!
+        player_gameweek_stats: [PlayerGameweekStats!]!
+        player_stats(gwStart: Int!, gwEnd: Int!): PlayerStats!
     }
 
     type Team {

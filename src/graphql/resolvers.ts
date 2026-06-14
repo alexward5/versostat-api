@@ -1,17 +1,10 @@
 import pool, { SCHEMA } from "../pg";
 import type Player from "../types/Player";
 import type { GraphQLContext } from "../dataloaders";
-import { createCache } from "../cache";
-
-const playersCache = createCache<Player[]>();
-const teamsCache = createCache<{ name: string }[]>();
-const eventsCache = createCache<{ id: number; is_current: boolean; finished: boolean }[]>();
 
 const resolvers = {
     Query: {
         players: async (): Promise<Player[]> => {
-            const cached = playersCache.get();
-            if (cached) return cached;
             const { rows } = await pool.query(`
                 SELECT fpl_player_id,
                     fpl_web_name,
@@ -21,35 +14,35 @@ const resolvers = {
                     fpl_selected_by_percent
                 FROM "${SCHEMA}".mv_player
             `);
-            const result = rows as Player[];
-            playersCache.set(result);
-            return result;
+            return rows as Player[];
         },
         teams: async () => {
-            const cached = teamsCache.get();
-            if (cached) return cached;
             const { rows } = await pool.query(`
                 SELECT name FROM "${SCHEMA}".fpl_teams
             `);
-            teamsCache.set(rows);
             return rows;
         },
         events: async () => {
-            const cached = eventsCache.get();
-            if (cached) return cached;
             const { rows } = await pool.query(`
                 SELECT id, is_current, finished FROM "${SCHEMA}".fpl_events
             `);
-            eventsCache.set(rows);
             return rows;
         },
     },
     Player: {
-        player_gameweek_data: (
+        player_gameweek_stats: (
             parent: Player,
             _args: Record<string, never>,
-            context: GraphQLContext
-        ) => context.playerGameweekDataLoader.load(parent.fpl_player_id),
+            context: GraphQLContext,
+        ) => context.playerGameweekStatsDataLoader.load(parent.fpl_player_id),
+        player_stats: (
+            parent: Player,
+            args: { gwStart: number; gwEnd: number },
+            context: GraphQLContext,
+        ) =>
+            context.playerStatsDataLoader.load(
+                `${parent.fpl_player_id}:${args.gwStart}:${args.gwEnd}`,
+            ),
     },
 };
 

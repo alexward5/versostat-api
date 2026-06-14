@@ -1,4 +1,4 @@
-interface PlayerGameweekData {
+interface PlayerGameweekStats {
     fpl_minutes: number;
     fpl_round: number;
     fpl_total_points: number;
@@ -16,4 +16,4 @@ interface PlayerGameweekData {
     calc_xgap: number;
 }
 
-export default PlayerGameweekData;
+export default PlayerGameweekStats;
